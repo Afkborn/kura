@@ -6,6 +6,9 @@ import {
   Label,
   Input,
   FormText,
+  Col,
+  ButtonGroup,
+  Row,
 } from "reactstrap";
 import { useState, useEffect } from "react";
 import Navi from "../navi/Navi";
@@ -24,11 +27,24 @@ function App() {
   const [yedekSayisi, setYedekSayisi] = useState(1);
   const [kuraBasladiMi, setKuraBasladiMi] = useState(false);
   const [totalKisiSayisi, setTotalKisiSayisi] = useState(0);
-
+  const [headers, setHeaders] = useState([]);
   const [kazananlar, setKazananlar] = useState([]);
   const [yedekler, setYedekler] = useState([]);
 
+  const [cSelected, setCSelected] = useState([]);
+
   useEffect(() => {}, [kazananlar]);
+
+  const onCheckboxBtnClick = (selected) => {
+    const index = cSelected.indexOf(selected);
+    if (index < 0) {
+      cSelected.push(selected);
+    } else {
+      cSelected.splice(index, 1);
+    }
+    setCSelected([...cSelected]);
+    console.log(cSelected);
+  };
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
@@ -42,11 +58,18 @@ function App() {
       alert("Lütfen bir CSV dosyası seçiniz.");
       return;
     }
-    // yedek varsa ve yedek sayısı toplam kişi sayısından fazla ise
-    // if (yedekVarMi && yedekSayisi + kazananSayisi > totalKisiSayisi ) {
-    //   alert("Toplam kişi sayısından fazla yedek seçtiniz");
-    //   return;
-    // }
+    if (
+      parseInt(yedekSayisi) + parseInt(kazananSayisi) >
+      parseInt(totalKisiSayisi)
+    ) {
+      alert("Toplam kişi sayısından fazla kazanan seçtiniz");
+      return;
+    }
+    if (cSelected.length === 0) {
+      alert("Lütfen kazananların bilgilerini görmek istediğiniz alanları seçiniz.");
+      return;
+    }
+
 
     let kuraListe = csvData;
     let kazananlar = [];
@@ -106,6 +129,7 @@ function App() {
         header: true,
         skipEmptyLines: true,
         complete: function (results) {
+          setHeaders(results.meta.fields);
           setTotalKisiSayisi(results.data.length);
           setCsvData(results.data);
           setIsSelectFile(true);
@@ -132,17 +156,45 @@ function App() {
             Toplam kişi sayısı : {totalKisiSayisi}
           </FormText>
         </FormGroup>
+        <FormGroup>
+          <ButtonGroup>
+            {headers.map((header) => (
+              <Button
+                color="primary"
+                outline
+                onClick={() => onCheckboxBtnClick(header)}
+                active={cSelected.includes(header)}
+              >
+                {header}
+              </Button>
+            ))}
+          </ButtonGroup>
+        </FormGroup>
         <div hidden={!isSelectFile}>
           <FormGroup>
-            <Label for="kazananSayisi">Kazanan sayısı</Label>
-            <RangeSlider
-              value={kazananSayisi}
-              onChange={(e) => setKazananSayisi(e.target.value)}
-              min={1}
-              max={totalKisiSayisi}
-              tooltipLabel={(currentValue) => `${currentValue} kişi`}
-              tooltip="on"
-            />
+            <Container>
+              <Row>
+                <Col xs="9">
+                  <Label for="kazananSayisi">Kazanan sayısı</Label>
+                  <RangeSlider
+                    value={kazananSayisi}
+                    onChange={(e) => setKazananSayisi(e.target.value)}
+                    min={1}
+                    max={totalKisiSayisi}
+                    tooltipLabel={(currentValue) => `${currentValue} kişi`}
+                    tooltip="on"
+                  />
+                </Col>
+                <Col xs="2" className="text-center">
+                  <Input
+                    className="mt-4"
+                    type="text"
+                    onChange={(e) => setKazananSayisi(e.target.value)}
+                    value={kazananSayisi}
+                  />
+                </Col>
+              </Row>
+            </Container>
           </FormGroup>
           <FormGroup className="mt-3" check inline>
             <Label check>
@@ -198,6 +250,7 @@ function App() {
           <KuraSonucList
             visible={kuraBasladiMi}
             list={kazananlar}
+            header={cSelected}
             slowDraw={slowDraw}
             slowInterval={slowInterval}
             durum={"Asil"}
@@ -208,6 +261,7 @@ function App() {
           <KuraSonucList
             visible={kuraBasladiMi}
             list={yedekler}
+            header={cSelected}
             slowDraw={slowDraw}
             slowInterval={slowInterval}
             durum={"Yedek"}

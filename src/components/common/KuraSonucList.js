@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Table } from "reactstrap";
-function KuraSonucList({ visible, list, slowDraw, slowInterval, durum }) {
+function KuraSonucList({
+  visible,
+  list,
+  header,
+  slowDraw,
+  slowInterval,
+  durum,
+}) {
   const [kazananlar, setKazananlar] = useState([]);
   useEffect(() => {
     if (slowDraw) {
       let i = 0;
       const interval = setInterval(() => {
         if (i < list.length) {
-          i++;
-          console.log("i: ", i);
           setKazananlar(list.slice(0, i));
+          i++;
         } else {
           clearInterval(interval);
         }
@@ -25,12 +31,10 @@ function KuraSonucList({ visible, list, slowDraw, slowInterval, durum }) {
         <Table>
           <thead>
             <tr>
-              <th>Sıra Numarası</th>
-              <th>T.C Kimlik Numarası</th>
-              <th>Adı</th>
-              <th>Soyadı</th>
-              <th>Cep Telefonu</th>
-              <th>Kurumu</th>
+              <th>#</th>
+              {header.map((h, index) => (
+                <th key={index}>{h}</th>
+              ))}
               <th>Durum</th>
             </tr>
           </thead>
@@ -38,11 +42,9 @@ function KuraSonucList({ visible, list, slowDraw, slowInterval, durum }) {
             {kazananlar.map((kazanan, index) => (
               <tr key={index}>
                 <th scope="row">{index + 1}</th>
-                <td>{kazanan["TC Kimlik Numarası"]}</td>
-                <td>{kazanan["Adı"]}</td>
-                <td>{kazanan["Soyadı"]}</td>
-                <td>{kazanan["Cep Telefonu"]}</td>
-                <td>{kazanan["Kurumu"]}</td>
+                {header.map((h, index) => (
+                  <td key={index}>{kazanan[h]}</td>
+                ))}
                 <td>{durum}</td>
               </tr>
             ))}
