@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Table } from "reactstrap";
 function KuraSonucList({
   visible,
@@ -8,14 +8,19 @@ function KuraSonucList({
   slowInterval,
   durum,
 }) {
+  const tableRef = useRef(null);
   const [kazananlar, setKazananlar] = useState([]);
   useEffect(() => {
     if (slowDraw) {
       let i = 0;
       const interval = setInterval(() => {
-        if (i < list.length) {
+        if (i < list.length ) {
           setKazananlar(list.slice(0, i));
           i++;
+          if (tableRef.current){
+            tableRef.current.scrollIntoView({ behavior: "smooth" });
+          }
+          
         } else {
           clearInterval(interval);
         }
@@ -38,7 +43,9 @@ function KuraSonucList({
               <th>Durum</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody
+            
+          >
             {kazananlar.map((kazanan, index) => (
               <tr key={index}>
                 <th scope="row">{index + 1}</th>
@@ -48,6 +55,7 @@ function KuraSonucList({
                 <td>{durum}</td>
               </tr>
             ))}
+            <div ref={tableRef}></div>
           </tbody>
         </Table>
       )}

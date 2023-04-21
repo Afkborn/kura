@@ -16,6 +16,7 @@ import Footer from "../footer/Footer";
 import RangeSlider from "react-bootstrap-range-slider";
 import Papa from "papaparse";
 import KuraSonucList from "../common/KuraSonucList";
+import { CSVLink } from "react-csv";
 
 function App() {
   const [csvData, setCsvData] = useState([]);
@@ -30,8 +31,8 @@ function App() {
   const [headers, setHeaders] = useState([]);
   const [kazananlar, setKazananlar] = useState([]);
   const [yedekler, setYedekler] = useState([]);
-
   const [cSelected, setCSelected] = useState([]);
+  const [kazananlarYSK] = useState([]);
 
   useEffect(() => {}, [kazananlar]);
 
@@ -43,7 +44,6 @@ function App() {
       cSelected.splice(index, 1);
     }
     setCSelected([...cSelected]);
-    console.log(cSelected);
   };
 
   const handleFormSubmit = (event) => {
@@ -66,10 +66,11 @@ function App() {
       return;
     }
     if (cSelected.length === 0) {
-      alert("Lütfen kazananların bilgilerini görmek istediğiniz alanları seçiniz.");
+      alert(
+        "Lütfen kazananların bilgilerini görmek istediğiniz alanları seçiniz."
+      );
       return;
     }
-
 
     let kuraListe = csvData;
     let kazananlar = [];
@@ -78,7 +79,23 @@ function App() {
       let max = kuraListe.length - 1;
       const rand = min + Math.random() * (max - min);
       const randInt = Math.floor(rand);
-      kazananlar.push(kuraListe[randInt]);
+
+      let kazanan = kuraListe[randInt];
+      kazananlar.push(kazanan);
+
+      // sandik_no, tc, ad, soyad, kurum, tel, egitim_yeri, egitim_tarihi, egitim_saati
+      kazananlarYSK.push({
+        sandik_no: "sandik_no",
+        tc: kazanan["TC"],
+        ad: kazanan["AD"],
+        soyad: kazanan["SOYAD"],
+        kurum: kazanan["KURUMADI"],
+        tel: kazanan["CEP TELEFONU"],
+        egitim_yeri: "egitim_yeri",
+        egitim_tarihi: "egitim_tarihi",
+        egitim_saati: "egitim_saati",
+
+      });
       kuraListe.splice(randInt, 1);
       shuffle(kuraListe); // shuffle the list
     }
@@ -94,10 +111,10 @@ function App() {
         const randInt = Math.floor(rand);
         yedekler.push(kuraListe[randInt]);
         kuraListe.splice(randInt, 1);
+        shuffle(kuraListe);
       }
       setYedekler(yedekler);
     }
-
     setKuraBasladiMi(true);
   };
 
@@ -137,6 +154,7 @@ function App() {
       });
     }
   };
+
 
   return (
     <Container className="mt-5">
@@ -268,6 +286,10 @@ function App() {
           />
         </div>
         <Button onClick={(e) => handleRepeat(e)}>Baştan başla</Button>
+        <CSVLink filename="kazananliste_ysk" className="button" data={kazananlarYSK}>Kazanan Liste İndir (YSK yüklemeye uyumlu)</CSVLink>
+        <CSVLink filename="kazananliste" data={kazananlar}>Kazanan Liste İndir (Tüm veri)</CSVLink>
+        <CSVLink data={csvData}>Kalan Liste İndir</CSVLink>
+
       </div>
       <Footer />
     </Container>
