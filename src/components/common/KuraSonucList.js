@@ -12,11 +12,13 @@ function KuraSonucList({
   const [kazananlar, setKazananlar] = useState([]);
   useEffect(() => {
     if (slowDraw) {
-      let i = 0;
+      let i = 1;
       const interval = setInterval(() => {
-        if (i < list.length ) {
+        if (i < list.length+1 ) {
           setKazananlar(list.slice(0, i));
+          console.log(i);
           i++;
+
           if (tableRef.current){
             tableRef.current.scrollIntoView({ behavior: "smooth" });
           }
